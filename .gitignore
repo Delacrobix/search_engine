@@ -1,0 +1,7 @@
+/.vscode
+
+/data_extraction/node_modules
+/data_extraction/data/extractedData
+/data_extraction/package-lock.json
+/data_extraction/.env
+/data_extraction/data/token.json
