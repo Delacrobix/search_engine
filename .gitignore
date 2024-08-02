@@ -1,7 +1,20 @@
 /.vscode
 
+# DATA EXTRACTION SCRIPTS
 /data_extraction/node_modules
 /data_extraction/data/extractedData
 /data_extraction/package-lock.json
 /data_extraction/.env
 /data_extraction/data/token.json
+
+# BACKEND
+backend-se/backend_se/__pycache__/
+backend-se/backend_se/**/*.py[cod]
+backend-se/poetry.lock
+backend-se/tests/__pycache__/
+backend-se/tests/*.py[cod]
+
+# FRONTEND
+
+# OTHERS
+tarsh
