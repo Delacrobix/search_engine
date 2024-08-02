@@ -2,6 +2,11 @@ PUT spotify-album
 {
   "mappings": {
     "properties": {
+      "album_type": {
+        "keyword": {
+          "type": "keyword"
+        }
+      },
       "artists": {
         "type": "nested",
         "properties": {
@@ -97,6 +102,9 @@ PUT spotify-album
         "fields": {
           "keyword": {
             "type": "keyword"
+          },
+          "search_as_you_type": {
+            "type": "search_as_you_type"
           }
         }
       },
@@ -134,6 +142,9 @@ PUT spotify-album
                 "fields": {
                   "keyword": {
                     "type": "keyword"
+                  },
+                  "search_as_you_type": {
+                    "type": "search_as_you_type"
                   }
                 }
               },
@@ -176,7 +187,9 @@ PUT spotify-album
           "name": {
             "type": "text",
             "fields": {
-              "type": "keyword"
+              "keyword": {
+                "type": "keyword"
+              }
             }
           },
           "preview_url": {
@@ -255,6 +268,9 @@ PUT spotify-artist
             "fields": {
               "keyword": {
                 "type": "keyword"
+              },
+              "search_as_you_type": {
+                "type": "search_as_you_type"
               }
             }
           },
@@ -274,4 +290,5 @@ PUT spotify-artist
     }
   }
 }
+
 
