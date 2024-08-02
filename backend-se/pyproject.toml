@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "backend-se"
+version = "0.1.0"
+description = ""
+authors = ["Jeff Rerín <jeffrey.rengifom@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+elasticsearch = "^8.14.0"
+fastapi = "^0.111.1"
+uvicorn = "^0.30.4"
+pydantic = "^2.8.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
