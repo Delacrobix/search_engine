@@ -2,7 +2,10 @@ import json
 
 from backend_se.services.app_services import es_search, is_es_ok
 from backend_se.types.types import SearchQuery
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+
+load_dotenv()
 
 app = FastAPI(
     title="Search Engine API",
