@@ -1,0 +1,42 @@
+services:
+  # elasticsearch
+  es-node:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.1.3
+    container_name: music-search-node
+    environment:
+      - node.name=node01
+      - cluster.name=music-cluster
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g # Heap size
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - http.cors.allow-credentials=true
+      - http.cors.allow-headers=X-Requested-With,Content-Type,Content-Length,Authorization,x-elastic-client-meta
+
+    volumes:
+      - music-search-es-data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    mem_limit: 3g
+    networks:
+      - elastic-net
+  # kibana
+  kibana:
+    depends_on:
+      - es-node
+    image: docker.elastic.co/kibana/kibana:8.1.3
+    container_name: kibana-music-search
+    environment:
+      - ELASTICSEARCH_HOSTS=["http://es-node:9200"]
+    ports:
+      - 5602:5601
+    networks:
+      - elastic-net
+
+volumes:
+  music-search-es-data:
+    driver: local
+
+networks:
+  elastic-net:
