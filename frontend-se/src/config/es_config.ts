@@ -8,15 +8,19 @@ const connector = new ElasticsearchAPIConnector({
 const es_config = {
   searchQuery: {
     search_fields: {
+      artists: {},
       name: {},
+      ambum_type: {},
       type: {},
     },
     result_fields: {
+      album_type: { raw: {} },
+      artists: { raw: {} },
       name: { raw: {} },
       type: { raw: {} },
     },
     facets: {
-      "available_markets.keyword": {
+      "album_type.keyword": {
         type: "value",
         size: 25,
       },

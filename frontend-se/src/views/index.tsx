@@ -1,16 +1,15 @@
 import React from "react";
 import {
   SearchProvider,
-  Results,
   PagingInfo,
-  Facet,
   ResultsPerPage,
   Paging,
 } from "@elastic/react-search-ui";
-import { MultiCheckboxFacet } from "@elastic/react-search-ui-views";
 
 import SearchBox from "../componentes/searchBox";
 import es_config from "../config/es_config";
+import Facets from "../componentes/facets";
+import Results from "../componentes/results";
 
 export default function Index() {
   return (
@@ -19,15 +18,23 @@ export default function Index() {
         <div className='w-full p-4'>
           <SearchBox />
         </div>
-        <PagingInfo />
-        <Results />
-        <ResultsPerPage />
-        <Facet
-          field='available_markets.keyword'
-          label='Available Markets'
-          view={MultiCheckboxFacet}
-        />
-        <Paging />
+        <div className='flex'>
+          <div className='pl-4 pr-8'>
+            <Facets field='album_type.keyword' label='Release Date' />
+          </div>
+          <div className=''>
+            <Results />
+          </div>
+        </div>
+        <div className=''>
+          <ResultsPerPage />
+        </div>
+        <div className='flex'>
+          <Paging />
+        </div>
+        <div className=' p-4'>
+          <PagingInfo />
+        </div>
       </div>
     </SearchProvider>
   );
