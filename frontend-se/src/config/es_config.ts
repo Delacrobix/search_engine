@@ -10,7 +10,7 @@ const es_config = {
     search_fields: {
       artists: {},
       name: {},
-      ambum_type: {},
+      album_type: {},
       type: {},
     },
     result_fields: {
