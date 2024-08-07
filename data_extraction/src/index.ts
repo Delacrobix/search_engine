@@ -16,9 +16,10 @@ async function main() {
   const token = await getToken();
 
   await searchQueries(token);
-  //TODO: extract artist IDs
 
-  const iterationArr = ["query", "album", "track"];
+  await retrieveArtistIds();
+
+  const iterationArr = ["artist", "query", "album", "track"];
 
   for (const type of iterationArr) {
     await retrieveDataByIds(token, type);
@@ -119,6 +120,34 @@ async function retrieveDataByIds(token: string, type: string): Promise<void> {
         completedIds = await getJsonData("completedIds.json");
         idsData = await getJsonData("ids.json");
       }
+    }
+  }
+}
+
+async function retrieveArtistIds(): Promise<void> {
+  const filesNamesArr = await getAllJsonFilesNamesFromFolder(
+    `extractedData/album`
+  );
+
+  for (const fileName of filesNamesArr) {
+    const jsonData = await getJsonData(`extractedData/album/${fileName}`);
+
+    const items = jsonData?.artists;
+
+    if (!items) continue;
+
+    for (const item of items) {
+      const id = item.id;
+      const type = item.type;
+
+      const completedIds: JsonIds = await getJsonData("completedIds.json");
+
+      if (completedIds[type]?.includes(id)) {
+        console.log(`Artist ID data ${id} already retrieved`);
+        continue;
+      }
+
+      await registerIdsInFile("ids.json", type, id);
     }
   }
 }
