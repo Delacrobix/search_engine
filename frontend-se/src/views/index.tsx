@@ -19,10 +19,12 @@ export default function Index() {
           <SearchBox />
         </div>
         <div className='flex'>
-          <div className='pl-4 pr-8'>
-            <Facets field='album_type.keyword' label='Release Date' />
+          <div className='pl-4 pr-8 mt-4'>
+            <Facets field='album_type.keyword' label='Album type' />
+            <Facets field='copyrights.type.keyword' label='Copyrights type' />
+            <Facets field='genres.keyword' label='Genres' />
           </div>
-          <div className=''>
+          <div className='w-full'>
             <Results />
           </div>
         </div>

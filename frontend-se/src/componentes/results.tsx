@@ -1,11 +1,13 @@
 import React from "react";
 import { Results as ElasticResults } from "@elastic/react-search-ui";
+import { EuiCard } from "@elastic/eui";
 
 export default function Results() {
   return (
-    <div>
-      <ElasticResults resultView={ResultsView} />
-    </div>
+    <ElasticResults
+      className='grid grid-cols-2 gap-3'
+      resultView={ResultsView}
+    />
   );
 }
 
@@ -17,31 +19,36 @@ interface ResultsViewProps {
 function ResultsView({ result, onClickLink }: Readonly<ResultsViewProps>) {
   console.log(result);
 
+  function handlerClick() {
+    console.log("Clicked");
+  }
+
   return (
-    <li className=' border-b-2'>
-      <div className='py-2'>
-        <h3>
-          {result.name.raw}
-          {/* Maintain onClickLink to correct track click throughs for analytics*/}
-          {/* <a onClick={onClickLink} href={result.nps_link.raw}>
-          {result.title.snippet}
-        </a> */}
-        </h3>
-      </div>
-      <div className=''>
-        {result.album_type.raw}
-        {/* {JSON.stringify(result.artists.raw)} */}
-        {/* use 'raw' values of fields to access values without snippets */}
-        <div className=''>
-          {/* <img src={result.image_url.raw} alt="" /> */}
-        </div>
-        {/* Use the 'snippet' property of fields with dangerouslySetInnerHtml to render snippets */}
-        {/* <div
-          className='sui-result__details'
-          dangerouslySetInnerHTML={{
-            __html: result.description.snippet,
-          }}></div> */}
-      </div>
-    </li>
+    <EuiCard
+      className='h-full'
+      layout='horizontal'
+      hasBorder={true}
+      onClick={handlerClick}
+      icon={
+        <img
+          className=' max-w-32 max-h-32'
+          src={result.images.raw[1].url}
+          alt={`${result.name.raw}-album-cover`}
+        />
+      }
+      title={<h3 className=' text-cyan-900 py-1'>{result.name.raw}</h3>}
+      description={
+        <span className='block '>
+          <span className='block text-gray-700 mb-2'>
+            {"Artists: " +
+              result.artists.raw.map((artist: any) => artist.name).join(", ")}
+          </span>
+          <span className='block text-gray-700 mb-2'>
+            {"Release date: " + result.release_date.raw}
+          </span>
+          <span className='block text-gray-700'>{result.album_type.raw}</span>
+        </span>
+      }
+    />
   );
 }

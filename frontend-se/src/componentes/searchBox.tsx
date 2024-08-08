@@ -18,7 +18,7 @@ function SearchBoxView({
         className='w-full p-2 border rounded-md'
         type='text'
         value={value}
-        placeholder='Try to search...'
+        placeholder='Search album...'
         onChange={(e) => onChange(e.target.value)}
       />
       <input
