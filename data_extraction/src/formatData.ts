@@ -26,6 +26,10 @@ function formatData(jsonData: any) {
   delete newJson.href;
   delete newJson.uri;
 
+  const MIN_POSITIVE_FLOAT = 1.17549435e-38;
+
+  if (newJson.popularity === 0) newJson.popularity = MIN_POSITIVE_FLOAT;
+
   const tracks = newJson.tracks.items;
   const artists = newJson.artists;
 
