@@ -1,9 +1,8 @@
-import { size } from "@elastic/eui/src/themes/amsterdam/global_styling/variables/_size";
 import ElasticsearchAPIConnector from "@elastic/search-ui-elasticsearch-connector";
 
 const connector = new ElasticsearchAPIConnector({
   host: "http://localhost:9200",
-  index: "spotify-album",
+  index: "spotify-albums",
 });
 
 const es_config = {
@@ -11,6 +10,9 @@ const es_config = {
     search_fields: {
       "artists.name": {},
       name: {},
+      // TODO: Search as you type is not working
+      "name.search_as_you_type": {},
+      "copyrights.text": {},
     },
     result_fields: {
       release_date: { raw: {} },
@@ -18,6 +20,7 @@ const es_config = {
       tracks: { raw: {} },
       popularity: { raw: {} },
       external_urls: { raw: {} },
+      label: { raw: {} },
       genres: { raw: {} },
       copyrights: { raw: {} },
       available_markets: { raw: {} },
@@ -28,17 +31,19 @@ const es_config = {
       images: { raw: {} },
     },
     facets: {
-      "genres.keyword": {
-        type: "value",
-        size: 10,
-      },
+      // TODO: This is not working: for some reason, the facet is not being displayed
       "copyrights.type.keyword": {
         type: "value",
-        size: 10,
       },
-      "album_type.keyword": {
+      "label.keyword": {
         type: "value",
-        size: 10,
+      },
+      album_type: {
+        type: "value",
+      },
+      available_markets: {
+        type: "value",
+        size: 100,
       },
     },
   },
