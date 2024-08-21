@@ -5,11 +5,11 @@ import {
   SearchProvider,
 } from "@elastic/react-search-ui";
 
-import Facets from "../componentes/facets";
-import Results from "../componentes/results";
-import SearchBox from "../componentes/searchBox";
+import Facets from "../components/facets";
+import Results from "../components/results";
+import SearchBox from "../components/searchBox";
 import es_config from "../config/es_config";
-import Options from "../componentes/options";
+import Options from "../components/options";
 
 export default function Index() {
   return (
