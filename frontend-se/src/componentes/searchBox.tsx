@@ -31,5 +31,12 @@ function SearchBoxView({
 }
 
 export default function SearchBox() {
-  return <ElasticSearchBox view={SearchBoxView} />;
+  return (
+    <ElasticSearchBox
+      debounceLength={50}
+      autocompleteMinimumCharacters={2}
+      autocompleteSuggestions={true}
+      view={SearchBoxView}
+    />
+  );
 }
