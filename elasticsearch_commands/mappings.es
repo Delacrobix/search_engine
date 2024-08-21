@@ -1,11 +1,9 @@
-PUT spotify-album
+PUT spotify-albums
 {
   "mappings": {
     "properties": {
       "album_type": {
-        "keyword": {
-          "type": "keyword"
-        }
+        "type": "keyword"
       },
       "artists": {
         "type": "nested",
@@ -220,7 +218,7 @@ PUT spotify-album
   }
 }
 
-PUT spotify-artist
+PUT spotify-artists
 {
   "mappings": {
     "properties": {
