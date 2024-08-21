@@ -1,15 +1,15 @@
-import React from "react";
 import {
-  SearchProvider,
+  Paging,
   PagingInfo,
   ResultsPerPage,
-  Paging,
+  SearchProvider,
 } from "@elastic/react-search-ui";
 
-import SearchBox from "../componentes/searchBox";
-import es_config from "../config/es_config";
 import Facets from "../componentes/facets";
 import Results from "../componentes/results";
+import SearchBox from "../componentes/searchBox";
+import es_config from "../config/es_config";
+import Options from "../componentes/options";
 
 export default function Index() {
   return (
@@ -18,11 +18,24 @@ export default function Index() {
         <div className='w-full p-4'>
           <SearchBox />
         </div>
+        <div className=''>
+          <Options
+            optionsList={[
+              {
+                name: "highlight",
+                onClick: () => {
+                  console.log("clicked");
+                },
+              },
+            ]}
+          />
+        </div>
         <div className='flex'>
           <div className='pl-4 pr-8 mt-4'>
-            <Facets field='album_type.keyword' label='Album type' />
-            <Facets field='copyrights.type.keyword' label='Copyrights type' />
-            <Facets field='genres.keyword' label='Genres' />
+            {/* <Facets field='copyrights.type.keyword' label='Copyrights type' /> */}
+            <Facets field='label.keyword' label='Produce by' />
+            <Facets field='album_type' label='Album type' />
+            <Facets field='available_markets' label='Available markets' />
           </div>
           <div className='w-full'>
             <Results />
