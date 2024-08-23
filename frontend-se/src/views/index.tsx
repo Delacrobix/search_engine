@@ -18,8 +18,8 @@ export default function Index() {
         <div className='w-full p-4'>
           <SearchBox />
         </div>
-        <div className=''>
-          <Options
+        <div>
+          {/* <Options
             optionsList={[
               {
                 name: "highlight",
@@ -28,10 +28,11 @@ export default function Index() {
                 },
               },
             ]}
-          />
+          /> */}
         </div>
         <div className='flex'>
           <div className='pl-4 pr-8 mt-4'>
+            {/* TODO: add `have preview` facet */}
             {/* <Facets field='copyrights.type.keyword' label='Copyrights type' /> */}
             <Facets field='label.keyword' label='Produce by' />
             <Facets field='album_type' label='Album type' />
@@ -41,7 +42,7 @@ export default function Index() {
             <Results />
           </div>
         </div>
-        <div className=''>
+        <div>
           <ResultsPerPage />
         </div>
         <div className='flex'>

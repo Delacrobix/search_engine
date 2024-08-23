@@ -5,12 +5,15 @@ import {
   EuiCard,
   EuiImage,
   EuiPanel,
-  EuiText,
   useGeneratedHtmlId,
 } from "@elastic/eui";
 
-import { Album as AlbumType, Artist } from "../types/types";
-import { formatDate } from "../utils/functions";
+import { Album as AlbumType, Artist, Track as TrackType } from "../types/types";
+import {
+  formatDate,
+  getUuidString,
+  millisecondsToMinutes,
+} from "../utils/functions";
 
 const ELASTIC_ENDPOINT =
   import.meta.env.VITE_ELASTIC_ENDPOINT || "http://localhost:9200";
@@ -18,6 +21,7 @@ const ELASTIC_ENDPOINT =
 export default function Album() {
   const { id } = useParams<{ id: string }>();
   const noArrowAccordionId = useGeneratedHtmlId({ prefix: "noArrowAccordion" });
+  const multipleAccordion = useGeneratedHtmlId({ prefix: "multipleAccordion" });
 
   const [albumData, setAlbumData] = useState<AlbumType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,25 +73,24 @@ export default function Album() {
   }
 
   return (
-    <div className=' min-h-screen flex flex-col items-center justify-center'>
+    <div className=' min-h-screen flex items-center justify-center'>
       <div className='w-full md:w-[60%] lg:w-[50%]'>
         <EuiCard
           className='m-2'
+          title={albumData?.name as string}
           description={
             <a target='_blank' href={albumData?.external_urls?.spotify}>
               Look album in Spotify
             </a>
-          }
-          title={albumData?.name as string}>
-          <div className=''>
+          }>
+          <div>
             <EuiImage
               size='l'
-              hasShadow
               alt={`${albumData?.name} (portrait)`}
               src={albumData?.images[0].url ?? ""}
             />
           </div>
-          <div className=''>
+          <div>
             <h3 className=' font-bold'>Artists:</h3>
             <ul>
               {albumData?.artists.map((artist: Artist) => (
@@ -95,7 +98,7 @@ export default function Album() {
                   <span className='mr-2'>{`${artist.name}: `}</span>
                   <a
                     href={artist.external_urls.spotify}
-                    target='_blank'
+                    // TODO: fetch track data from elastic search  target='_blank'
                     rel='noreferrer'>
                     Look in Spotify
                   </a>
@@ -112,8 +115,10 @@ export default function Album() {
           </p>
         </EuiCard>
       </div>
-      <div className='flex justify-center items-center'>
+      <div className='h-full'>
         <EuiAccordion
+          paddingSize='l'
+          color='subdued'
           id={noArrowAccordionId}
           arrowDisplay='none'
           buttonContent={
@@ -122,16 +127,54 @@ export default function Album() {
             </h3>
           }>
           {albumData?.tracks.map((track) => (
-            <EuiPanel key={track?.id} color='subdued'>
-              {/* TODO: Do the track another accordion that display the track info */}
-              <p>
-                <strong>{track?.track_number}: </strong>
-                {track?.name}
-              </p>
-            </EuiPanel>
+            <div key={getUuidString()}>
+              <EuiAccordion
+                id={multipleAccordion}
+                arrowDisplay='none'
+                buttonContent={
+                  <EuiPanel>
+                    <p>
+                      <strong>{track?.track_number}: </strong>
+                      {track?.name}
+                    </p>
+                  </EuiPanel>
+                }>
+                <Track track={track} />
+              </EuiAccordion>
+            </div>
           ))}
         </EuiAccordion>
       </div>
     </div>
   );
+}
+
+// TODO: fetch track data from elastic search
+
+function Track({ track }: Readonly<TrackProps>) {
+  return (
+    <div>
+      <p>
+        <strong>Duration: </strong> {millisecondsToMinutes(track.duration_ms)}
+      </p>
+      <p>
+        <strong>Explicit: </strong> {track.explicit ? "Yes" : "No"}
+      </p>
+      <p>
+        <strong>Preview: </strong>
+        {track.preview_url ? (
+          <audio controls>
+            <source src={track.preview_url} type='audio/mpeg' />
+            <track kind='captions' label='Captions' />
+          </audio>
+        ) : (
+          "No preview available"
+        )}
+      </p>
+    </div>
+  );
+}
+
+interface TrackProps {
+  track: TrackType;
 }

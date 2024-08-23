@@ -25,7 +25,7 @@ export type Artist = {
   type: string;
 };
 
-type Track = {
+export type Track = {
   artists: Artist[];
   available_markets: string[];
   disc_number: number;
