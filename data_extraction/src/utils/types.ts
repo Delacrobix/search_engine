@@ -35,3 +35,8 @@ export interface TokenData {
 interface Queries {
   queries: string[];
 }
+
+export interface RequestQueue {
+  type: string;
+  id: string;
+}

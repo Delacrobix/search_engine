@@ -60,27 +60,31 @@ export async function getDataByIdPerType(
       },
     });
 
-    await responseHandler(response);
+    const responseStatus = await responseHandler(response);
 
-    return await response.json();
+    if (responseStatus === 1) return await response.json();
+    else return responseStatus;
   } catch (e) {
     console.error("Error getting data per type: " + e);
+    return null;
   }
 }
 
-async function responseHandler(response: Response): Promise<void> {
+async function responseHandler(response: Response): Promise<number> {
   if (response.status === 401) {
     console.error("Invalid token or expired token");
-    process.exit(1);
+    return response.status;
   }
 
   if (response.status === 429) {
     console.error("Rate limit exceeded");
-    process.exit(1);
+    return response.status;
   }
 
   if (!response.ok) {
     console.error(`HTTP error! status: ${response.status}`);
-    process.exit(1);
+    return 0;
   }
+
+  return 1;
 }

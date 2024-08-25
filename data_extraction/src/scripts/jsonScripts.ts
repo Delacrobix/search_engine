@@ -4,6 +4,24 @@ import path from "path";
 import { AccessTokenResponse, JsonIds, TokenData } from "../utils/types";
 
 /**
+ * Writes data to a JSON file.
+ * @param filePath - The path to the JSON file in the data directory.
+ * @param data - The data to be written to the file.
+ * @returns A promise that resolves when the data is written.
+ * @throws If there is an error writing the file.
+ */
+export async function setJsonData(filePath: string, data: any): Promise<void> {
+  const joinedFilePath = path.join(__dirname, "..", "..", "data", filePath);
+
+  try {
+    const dataString = JSON.stringify(data, null, 2);
+    await fs.writeFile(joinedFilePath, dataString, "utf-8");
+  } catch (error) {
+    throw new Error("Error writing file: " + error);
+  }
+}
+
+/**
  * Reads a JSON file and returns its parsed content.
  * @param filePath - The path to the JSON file in the data directory.
  * @returns A promise that resolves to the parsed JSON data.

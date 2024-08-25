@@ -4,15 +4,15 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.14.11",
+    "@types/node": "^22.5.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
   },
   "scripts": {
-    "start": "npx ts-node src/index.ts",
-    "format": "npx ts-node src/formatData.ts"
+    "start": "npx ts-node src/index.ts"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^8.15.0",
     "dotenv": "^16.4.5"
   }
 }

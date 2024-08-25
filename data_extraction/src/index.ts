@@ -1,32 +1,224 @@
-import getAccessToken from "./scripts/getAccessToken";
+import * as readline from "readline";
 
+import getAccessToken from "./scripts/getAccessToken";
 import {
-  deleteIdFromFile,
   getAllJsonFilesNamesFromFolder,
   getJsonData,
   getTokenData,
-  registerIdsInFile,
   registerQueryInFiles,
   saveData,
+  setJsonData,
 } from "./scripts/jsonScripts";
-import { JsonIds, QueriesPerType, TokenData } from "./utils/types";
 import { getDataByIdPerType, searchData } from "./scripts/requests";
+import {
+  extractIdsFromAlbumData,
+  formatAlbumData,
+  formatArtistData,
+  formatTrackData,
+  isDataAlreadyRetrieved,
+  isIdInRequestsQueue,
+} from "./utils/indexFunctions";
+import { QueriesPerType, RequestQueue, TokenData } from "./utils/types";
+import { bulkIndexDocuments, deleteIndex } from "./scripts/elasticRequests";
 
-async function main() {
-  const token = await getToken();
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
-  await searchQueries(token);
+let token = "";
 
-  await retrieveArtistIds();
+(async () => {
+  token = await getToken();
+  await promptUser();
+})();
 
-  const iterationArr = ["artist", "query", "album", "track"];
+async function enqueueRequests(token: string): Promise<void> {
+  const albumFileNamesArr = await getAllJsonFilesNamesFromFolder(
+    `extractedData/album`
+  );
 
-  for (const type of iterationArr) {
-    await retrieveDataByIds(token, type);
+  for (const fileName of albumFileNamesArr) {
+    const albumData = await getJsonData(`extractedData/album/${fileName}`);
+
+    const ids: any = await extractIdsFromAlbumData(albumData);
+    if (ids.length === 0) continue;
+
+    const requestsQueue: RequestQueue[] = await getJsonData(
+      "requestsQueue.json"
+    );
+    let aux = 0;
+
+    for (const id of ids) {
+      const dataExist = await isDataAlreadyRetrieved(id.type, id.id);
+
+      if (!dataExist) {
+        const idInQueue = await isIdInRequestsQueue(id.id, requestsQueue);
+
+        if (!idInQueue) {
+          aux++;
+          requestsQueue.push({
+            type: id.type,
+            id: id.id,
+          });
+        }
+      }
+    }
+
+    if (aux > 0) await setJsonData("requestsQueue.json", requestsQueue);
+  }
+
+  const requestsQueue: RequestQueue[] = await getJsonData("requestsQueue.json");
+
+  console.log("requestsQueue len: ", requestsQueue.length);
+}
+
+async function executeRequestsQueue(token: string): Promise<void> {
+  console.log("Executing requests queue...");
+
+  const requestsQueue: RequestQueue[] = await getJsonData("requestsQueue.json");
+  const newRequestsQueue: RequestQueue[] = [...requestsQueue];
+
+  let errorCount = 0;
+  let successfullyExecutions = 0;
+
+  for (const request of requestsQueue) {
+    const data = await getDataByIdPerType(request.type, request.id, token);
+
+    if (data) {
+      if (typeof data === "number") {
+        errorCount++;
+      } else {
+        successfullyExecutions++;
+        await saveData(data, request.type, request.id);
+
+        console.log(
+          `Data for ID: ${request.id} and type: ${request.type} saved`
+        );
+
+        newRequestsQueue.splice(newRequestsQueue.indexOf(request), 1);
+      }
+    }
+
+    if (errorCount > 10) {
+      console.error("Too many errors, exiting...");
+      break;
+    }
+  }
+
+  await setJsonData("requestsQueue.json", newRequestsQueue);
+
+  console.log("Successfully executed requests: ", successfullyExecutions);
+  console.log("Remaining requests: ", newRequestsQueue.length);
+  console.log("Requests queue process finished.");
+}
+
+async function searchQueries(token: string): Promise<void> {
+  const allQueries: QueriesPerType = await getJsonData("searchQueries.json");
+  const keys = Object.keys(allQueries);
+
+  for (const key of keys) {
+    const queries = allQueries[key]?.queries;
+
+    if (queries?.length === 0 || !queries) {
+      console.error("No queries found for type: " + key);
+      continue;
+    }
+
+    console.log("Searching queries in the API...");
+
+    for (const query of queries) {
+      const data = await searchData("album", query, 50, "audio", token);
+
+      if (data) {
+        await registerQueryInFiles(query, key);
+        await saveData(data, "album", query);
+      }
+    }
   }
 }
 
-main();
+async function formatDataOption(): Promise<any> {
+  const albumNamesArr = await getAllJsonFilesNamesFromFolder(
+    `extractedData/album`
+  );
+
+  const artistsNamesArr = await getAllJsonFilesNamesFromFolder(
+    `extractedData/artist`
+  );
+
+  const tracksNamesArr = await getAllJsonFilesNamesFromFolder(
+    `extractedData/track`
+  );
+
+  for (const fileName of albumNamesArr) {
+    const jsonData = await getJsonData(`extractedData/album/${fileName}`);
+
+    if (!jsonData) continue;
+
+    const newJson = formatAlbumData(jsonData);
+    await saveData(newJson, "formatted/albums", fileName);
+  }
+
+  for (const fileName of artistsNamesArr) {
+    const jsonData = await getJsonData(`extractedData/artist/${fileName}`);
+
+    if (!jsonData) continue;
+
+    const newJson = formatArtistData(jsonData);
+    await saveData(newJson, "formatted/artists", fileName);
+  }
+
+  for (const fileName of tracksNamesArr) {
+    const jsonData = await getJsonData(`extractedData/track/${fileName}`);
+
+    if (!jsonData) continue;
+
+    const newJson = formatTrackData(jsonData);
+    await saveData(newJson, "formatted/tracks", fileName);
+  }
+}
+
+async function updateElasticSearchCluster(): Promise<void> {
+  await deleteIndex("spotify-albums");
+  await deleteIndex("spotify-artists");
+  await deleteIndex("spotify-tracks");
+
+  const albumFileNamesArr = await getAllJsonFilesNamesFromFolder(
+    "extractedData/formatted/albums"
+  );
+
+  const artistsFileNamesArr = await getAllJsonFilesNamesFromFolder(
+    "extractedData/formatted/artists"
+  );
+
+  const tracksFileNamesArr = await getAllJsonFilesNamesFromFolder(
+    "extractedData/formatted/tracks"
+  );
+
+  const albumsData = await Promise.all(
+    albumFileNamesArr.map(async (fileName) => {
+      return await getJsonData(`extractedData/formatted/albums/${fileName}`);
+    })
+  );
+
+  const artistsData = await Promise.all(
+    artistsFileNamesArr.map(async (fileName) => {
+      return await getJsonData(`extractedData/formatted/artists/${fileName}`);
+    })
+  );
+
+  const tracksData = await Promise.all(
+    tracksFileNamesArr.map(async (fileName) => {
+      return await getJsonData(`extractedData/formatted/tracks/${fileName}`);
+    })
+  );
+  console.log("tracksData: ", tracksData);
+
+  await bulkIndexDocuments("spotify-tracks", tracksData);
+  await bulkIndexDocuments("spotify-albums", albumsData);
+  await bulkIndexDocuments("spotify-artists", artistsData);
+}
 
 async function getToken(): Promise<string> {
   /**
@@ -50,142 +242,55 @@ async function getToken(): Promise<string> {
     token = tokenData.token;
   }
 
+  console.log("Token retrieved successfully");
   return token;
 }
 
-async function searchQueries(token: string): Promise<void> {
-  const allQueries: QueriesPerType = await getJsonData("searchQueries.json");
-  const keys = Object.keys(allQueries);
-
-  for (const key of keys) {
-    const queries = allQueries[key]?.queries;
-
-    if (!queries) {
-      console.error("No queries found for type: " + key);
-      continue;
-    }
-
-    console.log("Searching queries in the API...");
-
-    for (const query of queries) {
-      const data = await searchData("album", query, 50, "audio", token);
-
-      if (data) {
-        await registerQueryInFiles(query, key);
-        await saveData(data, "query", query);
-      }
-    }
+async function handleOption(option: string): Promise<void> {
+  switch (option) {
+    case "1":
+      await searchQueries(token);
+      break;
+    case "2":
+      await enqueueRequests(token);
+      break;
+    case "3":
+      await executeRequestsQueue(token);
+      break;
+    case "4":
+      await formatDataOption();
+      break;
+    case "5":
+      await updateElasticSearchCluster();
+      break;
+    case "6":
+      console.log("Exiting...");
+      rl.close();
+      return;
+    default:
+      console.log("Invalid option, please try again.");
   }
+
+  await promptUser();
 }
 
-async function retrieveDataByIds(token: string, type: string): Promise<void> {
-  await retrieveIdsFromFiles(type);
-
-  /**
-   * Getting data per id and type and saving it in the corresponding file.
-   */
-  let idsData: JsonIds = await getJsonData("ids.json");
-  let completedIds: JsonIds = await getJsonData("completedIds.json");
-
-  const idsKeys = Object.keys(idsData);
-
-  for (const key of idsKeys) {
-    const ids = idsData[key];
-    const completedIdsArr = completedIds[key];
-
-    if (!ids) {
-      console.error("No ids found for type: " + key);
-      continue;
-    }
-
-    console.log(`Searching data for type ${key}...`);
-
-    for (const id of ids) {
-      if (completedIdsArr?.includes(id)) {
-        console.log(`ID data ${id} already retrieved`);
-        continue;
-      }
-
-      let data = null;
-
-      data = await getDataByIdPerType(key, id, token);
-
-      if (data) {
-        await saveData(data, key, id);
-
-        // Updating the completedIds.json file and deleting the id from the ids.json file
-        await registerIdsInFile("completedIds.json", key, id);
-        await deleteIdFromFile("ids.json", key, id);
-
-        completedIds = await getJsonData("completedIds.json");
-        idsData = await getJsonData("ids.json");
-      }
-    }
-  }
+async function promptUser(): Promise<void> {
+  showMenu();
+  rl.question("\nSelect an option: ", handleOption);
 }
 
-async function retrieveArtistIds(): Promise<void> {
-  const filesNamesArr = await getAllJsonFilesNamesFromFolder(
-    `extractedData/album`
-  );
+function showMenu(): void {
+  console.log("\n -------- Process to execute ---------\n");
+  const menuOptions = [
+    "Search queries",
+    "Enqueue requests",
+    "Execute requests queue",
+    "format data",
+    "Update to ElasticSearch Cluster",
+    "Exit",
+  ];
 
-  for (const fileName of filesNamesArr) {
-    const jsonData = await getJsonData(`extractedData/album/${fileName}`);
-
-    const items = jsonData?.artists;
-
-    if (!items) continue;
-
-    for (const item of items) {
-      const id = item.id;
-      const type = item.type;
-
-      const completedIds: JsonIds = await getJsonData("completedIds.json");
-
-      if (completedIds[type]?.includes(id)) {
-        console.log(`Artist ID data ${id} already retrieved`);
-        continue;
-      }
-
-      await registerIdsInFile("ids.json", type, id);
-    }
-  }
+  menuOptions.forEach((option, index) => {
+    console.log(`${index + 1}. ${option}`);
+  });
 }
-
-async function retrieveIdsFromFiles(type: string): Promise<void> {
-  const filesNamesArr = await getAllJsonFilesNamesFromFolder(
-    `extractedData/${type}`
-  );
-
-  for (const fileName of filesNamesArr) {
-    const jsonData = await getJsonData(`extractedData/${type}/${fileName}`);
-
-    let items = null;
-
-    if (type === "query") {
-      items = jsonData?.items;
-    } else if (type === "album") {
-      items = jsonData?.tracks?.items;
-    }
-
-    if (!items) continue;
-
-    for (const item of items) {
-      const id = item.id;
-      const type = item.type;
-
-      const completedIds: JsonIds = await getJsonData("completedIds.json");
-
-      if (completedIds[type]?.includes(id)) {
-        console.log(`ID data ${id} already retrieved`);
-        continue;
-      }
-
-      await registerIdsInFile("ids.json", type, id);
-    }
-  }
-}
-
-//TODO: Delete fields: href, uri
-//TODO: Refactor followers field for artists. Just put the number of followers (followers: 100)
-// TODO: Refactor tracks field for albums. Just put the array of tracks
