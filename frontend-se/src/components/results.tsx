@@ -23,6 +23,12 @@ function ResultsView({ result }: Readonly<ResultsViewProps>) {
     navigate(`/album/${albumId}`);
   }
 
+  function highlightSnippet(snippet: string, color: string = "yellow"): string {
+    return snippet
+      .replace(/<em>/g, `<span style="background-color: ${color};">`)
+      .replace(/<\/em>/g, "</span>");
+  }
+
   return (
     <EuiCard
       className='h-full'
@@ -36,7 +42,16 @@ function ResultsView({ result }: Readonly<ResultsViewProps>) {
           alt={`${result.name.raw}-album-cover`}
         />
       }
-      title={<h3 className=' text-cyan-900 py-1'>{result.name.raw}</h3>}
+      title={
+        <h3
+          className='text-cyan-900 py-1'
+          dangerouslySetInnerHTML={{
+            __html: result.name?.snippet
+              ? highlightSnippet(result.name.snippet[0])
+              : result.name.raw,
+          }}
+        />
+      }
       description={
         <span className='flex gap-4'>
           <span>

@@ -10,9 +10,7 @@ const es_config = {
     search_fields: {
       "artists.name": {},
       name: {},
-      // TODO: Search as you type is not working
-      "name.search_as_you_type": {},
-      "copyrights.text": {},
+      "tracks.artists.name": {},
     },
     result_fields: {
       release_date: { raw: {} },
@@ -26,7 +24,11 @@ const es_config = {
       available_markets: { raw: {} },
       album_type: { raw: {} },
       artists: { raw: {} },
-      name: { raw: {} },
+      name: {
+        snippet: {
+          fallback: true,
+        },
+      },
       type: { raw: {} },
       images: { raw: {} },
     },
