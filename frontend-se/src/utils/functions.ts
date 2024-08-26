@@ -12,9 +12,12 @@ export function formatDate(date: string): string {
   });
 }
 
+//TODO: This method must support hours
 export function millisecondsToMinutes(milliseconds: number): string {
   const minutes = Math.floor(milliseconds / 60000);
-  const seconds = ((milliseconds % 60000) / 1000).toFixed(0);
+  const seconds = Math.floor((milliseconds % 60000) / 1000);
 
-  return `${minutes}:${seconds}`;
+  const formattedSeconds = seconds.toString().padStart(2, "0");
+
+  return `${minutes}:${formattedSeconds}`;
 }

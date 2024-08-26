@@ -1,33 +1,23 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  EuiAccordion,
-  EuiCard,
-  EuiImage,
-  EuiPanel,
-  useGeneratedHtmlId,
-} from "@elastic/eui";
+import { EuiBadge, EuiImage } from "@elastic/eui";
 
 import { Album as AlbumType, Artist, Track as TrackType } from "../types/types";
-import {
-  formatDate,
-  getUuidString,
-  millisecondsToMinutes,
-} from "../utils/functions";
+import { formatDate, millisecondsToMinutes } from "../utils/functions";
+import Tracks from "../components/tracks";
 
 const ELASTIC_ENDPOINT =
   import.meta.env.VITE_ELASTIC_ENDPOINT || "http://localhost:9200";
 
 export default function Album() {
   const { id } = useParams<{ id: string }>();
-  const noArrowAccordionId = useGeneratedHtmlId({ prefix: "noArrowAccordion" });
-  const multipleAccordion = useGeneratedHtmlId({ prefix: "multipleAccordion" });
 
   const [albumData, setAlbumData] = useState<AlbumType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // TODO: abstract this fetch into a custom hook with index and id like params
     async function fetchAlbumData() {
       try {
         const response = await fetch(
@@ -52,7 +42,9 @@ export default function Album() {
         }
 
         const data = await response.json();
-        console.log("Data: ", data.hits.hits[0]._source);
+
+        console.log("Album data: ", data.hits.hits[0]._source);
+
         setAlbumData(data.hits.hits[0]._source);
       } catch (error) {
         setError("Failed to fetch album data");
@@ -64,6 +56,19 @@ export default function Album() {
     fetchAlbumData();
   }, [id]);
 
+  function calculateTotalDuration(tracks: TrackType[]): string {
+    const totalDuration = tracks.reduce(
+      (acc: number, track: TrackType) => acc + track.duration_ms,
+      0
+    );
+
+    return millisecondsToMinutes(totalDuration);
+  }
+
+  function onArtistClick(url: string) {
+    window.open(url, "_blank");
+  }
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -73,108 +78,58 @@ export default function Album() {
   }
 
   return (
-    <div className=' min-h-screen flex items-center justify-center'>
-      <div className='w-full md:w-[60%] lg:w-[50%]'>
-        <EuiCard
-          className='m-2'
-          title={albumData?.name as string}
-          description={
+    <div className='w-full flex flex-col justify-center items-center'>
+      <div className='flex m-4'>
+        <div>
+          <EuiImage
+            size='l'
+            alt={`${albumData?.name} (portrait)`}
+            src={albumData?.images[0].url ?? ""}
+          />
+        </div>
+        <div className='md:mx-8 flex flex-col items-center justify-center '>
+          <div className=''>
+            <h3 className='text-4xl font-bold py-6 '>{albumData?.name}</h3>
+          </div>
+          <div className='w-full space-y-4 uppercase '>
             <a target='_blank' href={albumData?.external_urls?.spotify}>
               Look album in Spotify
             </a>
-          }>
-          <div>
-            <EuiImage
-              size='l'
-              alt={`${albumData?.name} (portrait)`}
-              src={albumData?.images[0].url ?? ""}
-            />
-          </div>
-          <div>
-            <h3 className=' font-bold'>Artists:</h3>
-            <ul>
-              {albumData?.artists.map((artist: Artist) => (
-                <li key={artist.id}>
-                  <span className='mr-2'>{`${artist.name}: `}</span>
-                  <a
-                    href={artist.external_urls.spotify}
-                    // TODO: fetch track data from elastic search  target='_blank'
-                    rel='noreferrer'>
-                    Look in Spotify
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <p>
-            <strong>Release Date:</strong>{" "}
-            {formatDate(albumData?.release_date as string)}
-          </p>
-          <p>
-            <strong>Type:</strong> {albumData?.album_type}
-          </p>
-        </EuiCard>
-      </div>
-      <div className='h-full'>
-        <EuiAccordion
-          paddingSize='l'
-          color='subdued'
-          id={noArrowAccordionId}
-          arrowDisplay='none'
-          buttonContent={
-            <h3 className=' text-xl'>
-              <strong>Tracks:</strong> {`${albumData?.total_tracks}`}
-            </h3>
-          }>
-          {albumData?.tracks.map((track) => (
-            <div key={getUuidString()}>
-              <EuiAccordion
-                id={multipleAccordion}
-                arrowDisplay='none'
-                buttonContent={
-                  <EuiPanel>
-                    <p>
-                      <strong>{track?.track_number}: </strong>
-                      {track?.name}
-                    </p>
-                  </EuiPanel>
-                }>
-                <Track track={track} />
-              </EuiAccordion>
+            <div className='flex gap-1'>
+              <h3 className=' font-bold mr-2'>Artists:</h3>
+              <div className='flex'>
+                {albumData?.artists?.map((artist: Artist) => (
+                  <EuiBadge
+                    onClickAriaLabel='Click to view artist in Spotify'
+                    //TODO: new page artist and redirect there when click
+                    onClick={() =>
+                      onArtistClick(artist?.external_urls?.spotify)
+                    }
+                    key={artist.id}
+                    color='default'>
+                    {artist.name}
+                  </EuiBadge>
+                ))}
+              </div>
             </div>
-          ))}
-        </EuiAccordion>
+            <p>
+              <strong>Release Date:</strong>{" "}
+              {formatDate(albumData?.release_date as string)}
+            </p>
+            <p>
+              <strong>Type:</strong> {albumData?.album_type}
+            </p>
+            <p className=' font-semibold'>
+              {albumData?.total_tracks} SONGS (
+              {albumData?.tracks && calculateTotalDuration(albumData.tracks)})
+            </p>
+          </div>
+        </div>
+      </div>
+      {/* TRACKS LIST */}
+      <div className='md:mx-[20%]'>
+        {albumData && <Tracks data={albumData} />}
       </div>
     </div>
   );
-}
-
-// TODO: fetch track data from elastic search
-
-function Track({ track }: Readonly<TrackProps>) {
-  return (
-    <div>
-      <p>
-        <strong>Duration: </strong> {millisecondsToMinutes(track.duration_ms)}
-      </p>
-      <p>
-        <strong>Explicit: </strong> {track.explicit ? "Yes" : "No"}
-      </p>
-      <p>
-        <strong>Preview: </strong>
-        {track.preview_url ? (
-          <audio controls>
-            <source src={track.preview_url} type='audio/mpeg' />
-            <track kind='captions' label='Captions' />
-          </audio>
-        ) : (
-          "No preview available"
-        )}
-      </p>
-    </div>
-  );
-}
-
-interface TrackProps {
-  track: TrackType;
 }

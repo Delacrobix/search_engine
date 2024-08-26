@@ -1,6 +1,7 @@
 import { Results as ElasticResults } from "@elastic/react-search-ui";
 import { EuiCard } from "@elastic/eui";
 import { useNavigate } from "react-router-dom";
+import { Artist } from "../types/types";
 
 export default function Results() {
   return (
@@ -10,10 +11,6 @@ export default function Results() {
       resultView={ResultsView}
     />
   );
-}
-
-interface ResultsViewProps {
-  result: any;
 }
 
 function ResultsView({ result }: Readonly<ResultsViewProps>) {
@@ -45,7 +42,9 @@ function ResultsView({ result }: Readonly<ResultsViewProps>) {
           <span>
             <span className='block text-gray-700 mb-2'>
               {"Artists: " +
-                result.artists.raw.map((artist: any) => artist.name).join(", ")}
+                result.artists.raw
+                  .map((artist: Artist) => artist.name)
+                  .join(", ")}
             </span>
             <span className='block text-gray-700 mb-2'>
               {"Release date: " + result.release_date.raw}
@@ -59,4 +58,8 @@ function ResultsView({ result }: Readonly<ResultsViewProps>) {
       }
     />
   );
+}
+
+interface ResultsViewProps {
+  result: any;
 }
