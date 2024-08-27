@@ -9,7 +9,7 @@ import Facets from "../components/facets";
 import Results from "../components/results";
 import SearchBox from "../components/searchBox";
 import es_config from "../config/es_config";
-import Options from "../components/options";
+// import Options from "../components/options";
 
 export default function Index() {
   return (
@@ -34,8 +34,10 @@ export default function Index() {
           <div className='pl-4 pr-8 mt-4'>
             {/* TODO: add `have preview` facet */}
             {/* <Facets field='copyrights.type.keyword' label='Copyrights type' /> */}
+            <Facets field='have_preview_url' label='Have preview' />
             <Facets field='label.keyword' label='Produce by' />
             <Facets field='album_type' label='Album type' />
+            <Facets field='total_tracks' label='Tracks' />
             <Facets field='available_markets' label='Available markets' />
           </div>
           <div className='w-full'>

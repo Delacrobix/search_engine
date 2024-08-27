@@ -213,7 +213,6 @@ async function updateElasticSearchCluster(): Promise<void> {
       return await getJsonData(`extractedData/formatted/tracks/${fileName}`);
     })
   );
-  console.log("tracksData: ", tracksData);
 
   await bulkIndexDocuments("spotify-tracks", tracksData);
   await bulkIndexDocuments("spotify-albums", albumsData);

@@ -119,6 +119,9 @@ PUT _component_template/spotify-album_template
         "total_tracks": {
           "type": "short"
         },
+        "have_preview_url":{
+          "type": "keyword"
+        },
         "tracks": {
           "type": "nested",
           "properties": {
@@ -192,7 +195,7 @@ PUT _component_template/spotify-album_template
               }
             },
             "preview_url": {
-              "type": "text"
+              "type": "keyword"
             },
             "track_number": {
               "type": "short"

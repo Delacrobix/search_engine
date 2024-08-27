@@ -174,7 +174,7 @@ PUT _component_template/spotify-track_template
           }
         },
         "preview_url": {
-          "type": "text"
+          "type": "keyword"
         },
         "track_number": {
           "type": "short"
@@ -192,7 +192,8 @@ PUT _component_template/spotify-track_template
   }
 }
 
-PUT _index_template/spotify-albums_index-template
+
+PUT _index_template/spotify-tracks_index-template
 {
   "index_patterns": [
     "spotify-track*"

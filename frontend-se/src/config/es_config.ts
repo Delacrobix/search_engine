@@ -1,5 +1,7 @@
 import ElasticsearchAPIConnector from "@elastic/search-ui-elasticsearch-connector";
 
+import { Facets } from "./elements/facets";
+
 const connector = new ElasticsearchAPIConnector({
   host: "http://localhost:9200",
   index: "spotify-albums",
@@ -32,22 +34,7 @@ const es_config = {
       type: { raw: {} },
       images: { raw: {} },
     },
-    facets: {
-      // TODO: This is not working: for some reason, the facet is not being displayed
-      "copyrights.type.keyword": {
-        type: "value",
-      },
-      "label.keyword": {
-        type: "value",
-      },
-      album_type: {
-        type: "value",
-      },
-      available_markets: {
-        type: "value",
-        size: 100,
-      },
-    },
+    facets: Facets,
   },
   apiConnector: connector,
   alwaysSearchOnInitialLoad: true,

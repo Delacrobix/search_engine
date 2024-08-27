@@ -1,4 +1,3 @@
-import React from "react";
 import { Facet } from "@elastic/react-search-ui";
 import { FacetViewProps } from "@elastic/react-search-ui-views";
 
@@ -38,6 +37,12 @@ function FacetsView({
     }
   }
 
+  function getLabelForValue(value: string) {
+    if (value === "true") return "Have preview";
+    if (value === "false") return "No preview";
+    return value;
+  }
+
   return (
     <div className='mb-6'>
       <h3 className='text-lg text-nowrap font-semibold pb-1'>{label}</h3>
@@ -52,7 +57,7 @@ function FacetsView({
               onChange={() => handleSelection(option.value as string)}
             />
             <label htmlFor={option.value as string}>
-              {option.value} ({option.count})
+              {getLabelForValue(option.value as string)} ({option.count})
             </label>
           </li>
         ))}

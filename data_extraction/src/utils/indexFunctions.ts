@@ -32,6 +32,7 @@ export function formatAlbumData(jsonData: any) {
   }
 
   newJson.tracks = tracks;
+  setupHavePreviewUrl(newJson);
 
   return newJson;
 }
@@ -133,4 +134,17 @@ export async function isDataAlreadyRetrieved(
   }
 
   return false;
+}
+
+function setupHavePreviewUrl(data: any): void {
+  const tracks = data.tracks;
+  let hasPreviewUrl = false;
+
+  for (let track of tracks) {
+    if (track.preview_url) {
+      hasPreviewUrl = true;
+    }
+  }
+
+  data.have_preview_url = hasPreviewUrl ? "true" : "false";
 }
