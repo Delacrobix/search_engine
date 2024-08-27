@@ -38,7 +38,6 @@ export default function Index() {
             <Facets field='label.keyword' label='Produce by' />
             <Facets field='album_type' label='Album type' />
             <Facets field='total_tracks' label='Tracks' />
-            <Facets field='available_markets' label='Available markets' />
           </div>
           <div className='w-full'>
             <Results />

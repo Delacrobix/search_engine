@@ -27,8 +27,4 @@ export const Facets = {
   album_type: {
     type: "value",
   },
-  available_markets: {
-    type: "value",
-    size: 100,
-  },
 };
