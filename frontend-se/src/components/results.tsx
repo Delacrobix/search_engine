@@ -2,6 +2,7 @@ import { Results as ElasticResults } from "@elastic/react-search-ui";
 import { EuiCard } from "@elastic/eui";
 import { useNavigate } from "react-router-dom";
 import { Artist } from "../types/types";
+import { useOptionsContext } from "../context/optionsContext";
 
 export default function Results() {
   return (
@@ -14,6 +15,8 @@ export default function Results() {
 }
 
 function ResultsView({ result }: Readonly<ResultsViewProps>) {
+  const { highlighting } = useOptionsContext();
+
   console.log(result);
   const navigate = useNavigate();
 
@@ -43,14 +46,18 @@ function ResultsView({ result }: Readonly<ResultsViewProps>) {
         />
       }
       title={
-        <h3
-          className='text-cyan-900 py-1'
-          dangerouslySetInnerHTML={{
-            __html: result.name?.snippet
-              ? highlightSnippet(result.name.snippet[0])
-              : result.name.raw,
-          }}
-        />
+        highlighting ? (
+          <h3
+            className='text-cyan-900 py-1'
+            dangerouslySetInnerHTML={{
+              __html: result.name?.snippet
+                ? highlightSnippet(result.name.snippet[0])
+                : result.name.raw,
+            }}
+          />
+        ) : (
+          <h3 className='text-cyan-900 py-1'>{result.name.raw}</h3>
+        )
       }
       description={
         <span className='flex gap-4'>

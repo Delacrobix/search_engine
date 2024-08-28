@@ -1,5 +1,6 @@
 import { FormEvent } from "react";
 import { SearchBox as ElasticSearchBox } from "@elastic/react-search-ui";
+import { useOptionsContext } from "../context/optionsContext";
 
 interface SearchBoxViewProps {
   value: string;
@@ -31,9 +32,11 @@ function SearchBoxView({
 }
 
 export default function SearchBox() {
+  const { searchAsYouType } = useOptionsContext();
+
   return (
     <ElasticSearchBox
-      searchAsYouType={true}
+      searchAsYouType={searchAsYouType}
       debounceLength={50}
       autocompleteMinimumCharacters={2}
       autocompleteSuggestions={true}

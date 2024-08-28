@@ -9,26 +9,38 @@ import Facets from "../components/facets";
 import Results from "../components/results";
 import SearchBox from "../components/searchBox";
 import es_config from "../config/es_config";
-// import Options from "../components/options";
+import Options from "../components/options";
+import { useOptionsContext } from "../context/optionsContext";
 
 export default function Index() {
+  const {
+    searchAsYouType,
+    highlighting,
+    toggleHighlighting,
+    toggleSearchAsYouType,
+  } = useOptionsContext();
+
   return (
     <SearchProvider config={es_config}>
-      <div className='w-full h-full'>
-        <div className='w-full p-4'>
+      <div className='w-full h-full p-4'>
+        <div className='w-full '>
           <SearchBox />
         </div>
-        <div>
-          {/* <Options
+        <div className='p-4'>
+          <Options
             optionsList={[
               {
-                name: "highlight",
-                onClick: () => {
-                  console.log("clicked");
-                },
+                name: "Highlight",
+                checked: highlighting,
+                onClick: toggleHighlighting,
+              },
+              {
+                name: "Search as you type",
+                checked: searchAsYouType,
+                onClick: toggleSearchAsYouType,
               },
             ]}
-          /> */}
+          />
         </div>
         <div className='flex'>
           <div className='pl-4 pr-8 mt-4'>

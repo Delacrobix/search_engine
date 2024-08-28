@@ -1,5 +1,5 @@
 import React from "react";
-import { EuiCheckbox, useGeneratedHtmlId } from "@elastic/eui";
+import { Checkbox } from "antd";
 
 import { getUuidString } from "../utils/functions";
 
@@ -8,6 +8,7 @@ export default function Options({ optionsList }: Readonly<OptionsViewProps>) {
     <div className='flex'>
       {optionsList.map((option) => (
         <Option
+          isChecked={option.checked}
           key={getUuidString()}
           name={option.name}
           action={option.onClick}
@@ -17,28 +18,23 @@ export default function Options({ optionsList }: Readonly<OptionsViewProps>) {
   );
 }
 
-function Option({ name, action }: Readonly<OptionViewProps>) {
-  const [checked, setChecked] = React.useState(false);
+import { CheckboxChangeEvent } from "antd/lib/checkbox";
 
-  const basicCheckboxId = useGeneratedHtmlId({ prefix: "basicCheckbox" });
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setChecked(e.target.checked);
+function Option({ name, action, isChecked }: Readonly<OptionViewProps>) {
+  function onChange() {
     action();
   }
 
   return (
-    <EuiCheckbox
-      id={basicCheckboxId}
-      label={name}
-      checked={checked}
-      onChange={(e) => handleChange(e)}
-    />
+    <Checkbox checked={isChecked} onChange={onChange}>
+      {name}
+    </Checkbox>
   );
 }
 
 interface OptionObject {
   name: string;
+  checked: boolean;
   onClick: () => void;
 }
 
@@ -48,5 +44,6 @@ interface OptionsViewProps {
 
 interface OptionViewProps {
   name: string;
+  isChecked: boolean;
   action: () => void;
 }
