@@ -43,7 +43,7 @@ export default function Album() {
 
         const data = await response.json();
 
-        console.log("Album data: ", data.hits.hits[0]._source);
+        // console.log("Album data: ", data.hits.hits[0]._source);
 
         setAlbumData(data.hits.hits[0]._source);
       } catch (error) {

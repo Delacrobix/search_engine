@@ -2,8 +2,10 @@ import ElasticsearchAPIConnector from "@elastic/search-ui-elasticsearch-connecto
 
 import { Facets } from "./elements/facets";
 
+const HOST = import.meta.env.VITE_ELASTIC_ENDPOINT;
+
 const connector = new ElasticsearchAPIConnector({
-  host: "http://localhost:9200",
+  host: HOST,
   index: "spotify-albums",
 });
 

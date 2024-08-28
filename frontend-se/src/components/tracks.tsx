@@ -92,7 +92,7 @@ function Track({ id }: Readonly<TrackProps>) {
 
         const data = await response.json();
 
-        console.log("Track data: ", data.hits.hits[0]._source);
+        // console.log("Track data: ", data.hits.hits[0]._source);
 
         setTrackData(data.hits.hits[0]._source);
       } catch (error) {

@@ -17,7 +17,8 @@ export default function Results() {
 function ResultsView({ result }: Readonly<ResultsViewProps>) {
   const { highlighting } = useOptionsContext();
 
-  console.log(result);
+  // console.log(result);
+
   const navigate = useNavigate();
 
   function handlerClick() {

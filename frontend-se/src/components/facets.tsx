@@ -15,9 +15,9 @@ export default function Facets({ field, label, show }: Readonly<FacetsProps>) {
 }
 
 function FacetsView({
-  values,
-  onChange,
-  onSearch,
+  // values,
+  // onChange,
+  // onSearch,
   showMore,
   label,
   onMoreClick,
@@ -25,7 +25,7 @@ function FacetsView({
   onSelect,
   options,
 }: Readonly<FacetViewProps>) {
-  console.log("labels: ", label);
+  // console.log("labels: ", label);
 
   function handleSelection(value: string) {
     const isSelected = options.find(
