@@ -1,5 +1,6 @@
 import { Facet } from "@elastic/react-search-ui";
 import { FacetViewProps } from "@elastic/react-search-ui-views";
+import { Checkbox } from "antd";
 
 import { getUuidString } from "../utils/functions";
 
@@ -49,16 +50,12 @@ function FacetsView({
       <ul className=' text-nowrap'>
         {options.map((option) => (
           <li key={getUuidString()}>
-            <input
+            <Checkbox
               className='mr-2 cursor-pointer'
-              type='checkbox'
-              id={getUuidString()}
               checked={option.selected}
-              onChange={() => handleSelection(option.value as string)}
-            />
-            <label htmlFor={option.value as string}>
+              onChange={() => handleSelection(option.value as string)}>
               {getLabelForValue(option.value as string)} ({option.count})
-            </label>
+            </Checkbox>
           </li>
         ))}
       </ul>
