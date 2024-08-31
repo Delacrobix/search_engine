@@ -7,14 +7,6 @@
 /data_extraction/.env
 /data_extraction/data/token.json
 
-# BACKEND
-backend-se
-backend-se/backend_se/__pycache__/
-backend-se/backend_se/**/*.py[cod]
-backend-se/poetry.lock
-backend-se/tests/__pycache__/
-backend-se/tests/*.py[cod]
-backend-se/.env
 
 # FRONTEND
 
